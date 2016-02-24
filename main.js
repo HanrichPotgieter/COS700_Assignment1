@@ -157,7 +157,8 @@ var PSO = function(particles,objective,range,count,callback){
     }, this);
     //console.log(particles);
     //colog.success("===================================================");
-    callback(particles,count);
+    //callback(particles,count);
+    return particles;
 };
 
 // ===================================
@@ -195,16 +196,23 @@ var showResults = function(result){
     
 var range = {min:-100.0,max:100.0}
 
-var loop = function(result,count){
-    count = count + 1;
+
+//for(var j =0;j<100;j++)
+//{
+    var particles = generateParticles(20,range);
+    for(var i =1;i<1000000;i++){
+        particles = PSO(particles,abs,range,0,null)
+    }
+//}
+//var loop = function(result,count){
+//    count = count + 1;
     //console.log(result);
     //console.log(result[0].neighborhoodBest);
-    if(count <= 100){
-        PSO(result,alpline,range,count,loop);
-    }
-    
-}
+//    if(count <= 100){
+//        PSO(result,abs,range,count,loop);
+//    }
+//}
 
-PSO(generateParticles(20,range),alpline,range,0,loop);
+//PSO(generateParticles(20,range),abs,range,0,loop);
 
 // ===================================
