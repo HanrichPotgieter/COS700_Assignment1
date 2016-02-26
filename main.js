@@ -1,4 +1,21 @@
 var colog = require('colog');
+var winston = require('winston');
+// ===================================
+// Absolute Value Function
+// ===================================
+
+// Setting up logger
+var logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.File)({
+      name: 'info-File',
+      filename: 'info-File.log',
+      level: 'info'
+    })
+  ]
+});
+
+// ===================================
 
 // ===================================
 // Absolute Value Function
@@ -40,8 +57,15 @@ var alpline = function(x,callback){
     }, this);
     
     result = firstTerm*Math.sqrt(secondTerm);
+    if(isNaN(result)){
+        callback(Infinity);
+    }
+    else
+    {
+        callback(result);
+    }
     //console.log(result);
-    callback(result);
+    
 };
 
 // ===================================
@@ -84,7 +108,7 @@ var isWithinRangeValue = function(x,range){
 // PSO - Particle Swarm Optmizer
 // ===================================
 var gbest = null;
-var PSO = function(particles,objective,range,count,callback){
+var PSO = function(particles,objective,range,count,LogName,callback){
     //colog.success("===================================================");
     //colog.success("Iternation " + count);
     //if(gbest !== null)
@@ -112,9 +136,11 @@ var PSO = function(particles,objective,range,count,callback){
         else{
             if(element.fitness < gbest.fitness && isWithinRange(element,range)){
                 gbest = {fitness : element.fitness ,j: element.j};
-                colog.success("New global best found");
+                colog.success("New global best found loggin to " + LogName);
                 console.log(gbest);
                 colog.success("=====================");
+                //Log to file...
+                logger.log('info', 'Global Best',gbest);
             }
         }
     }, this);
@@ -179,7 +205,7 @@ var generateParticles = function(count,range){
                 j: []
             },
             neighborhoodBest: {},
-            velocity:[0.0,0.0,0.0]
+            velocity:[getRandomInt(range.min,range.max),getRandomInt(range.min,range.max)]
             });
     }
     return particles;
@@ -190,29 +216,62 @@ var generateParticles = function(count,range){
 // ===================================
 // Calculations..
 // ===================================
-var showResults = function(result){
-    console.log(result);
-}
-    
-var range = {min:-100.0,max:100.0}
 
+//logger.log('info', 'Starting the Application',{test:'Hello'});
+var iterrations = 50;
 
-//for(var j =0;j<100;j++)
-//{
+colog.headerInfo('======================================='); 
+colog.headerInfo('Uni-Modal abs function'); 
+colog.headerInfo('=======================================');
+
+logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.File)({
+      name: 'abs-File',
+      filename: 'abs-File.log',
+      level: 'info'
+    })
+  ]
+});
+
+colog.progress(0, iterrations); 
+for(var j = 0;j<iterrations;j++){
+    logger.log('info', 'Iteration' + j);
+    gbest = null;
+    colog.progress();
+    var range = {min:-10.0,max:10.0}
     var particles = generateParticles(20,range);
-    for(var i =1;i<1000000;i++){
-        particles = PSO(particles,abs,range,0,null)
+    
+    for(var i =1;i<100000;i++){
+        particles = PSO(particles,abs,range,0,'abs-File',null);
     }
-//}
-//var loop = function(result,count){
-//    count = count + 1;
-    //console.log(result);
-    //console.log(result[0].neighborhoodBest);
-//    if(count <= 100){
-//        PSO(result,abs,range,count,loop);
-//    }
-//}
+}
 
-//PSO(generateParticles(20,range),abs,range,0,loop);
+colog.headerInfo('======================================='); 
+colog.headerInfo('Multi-Modal alpline function'); 
+colog.headerInfo('=======================================');
+
+logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.File)({
+      name: 'alpline-File',
+      filename: 'alpline-File.log',
+      level: 'info'
+    })
+  ]
+});
+
+colog.progress(0, iterrations); 
+for(var j = 0;j<iterrations;j++){
+    logger.log('info', 'Iteration' + j);
+    gbest = null;
+    colog.progress();
+    var range = {min:-100.0,max:100.0}
+    var particles = generateParticles(20,range);
+    
+    for(var i =1;i<100000;i++){
+        particles = PSO(particles,alpline,range,0,'alpline-File',null);
+    }
+}
 
 // ===================================
